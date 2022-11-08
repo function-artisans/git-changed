@@ -1,0 +1,13 @@
+#+title: git-changed
+#+options: toc:nil
+
+* git-changed
+
+This is a small tool that helps to list the files you have changed (added/modifed/removed) in your branch.
+
+
+** Links
+
+- https://docs.rs/clap/latest/clap/
+- https://docs.rs/git2/latest/git2/
+- https://docs.rs/glob/latest/glob/
