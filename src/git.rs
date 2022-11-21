@@ -1,5 +1,3 @@
-extern crate git2;
-
 use git2::BranchType;
 use git2::DiffDelta;
 use git2::Oid;

@@ -1,5 +1,3 @@
-extern crate glob;
-
 use glob::Pattern;
 
 #[derive(Debug, Copy, Clone)]
