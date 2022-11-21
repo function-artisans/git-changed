@@ -1,10 +1,11 @@
-use crate::Options;
 use clap::builder::Arg;
 use clap::builder::ArgAction;
 use clap::builder::Command;
 use clap::ArgMatches;
 use git2::Config;
 use glob::Pattern;
+
+use crate::Options;
 
 const CONFIG_PATHS: [&str; 2] = ["changed.defaultBranch", "init.defaultBranch"];
 const DEFAULT_BRANCH: &str = "main";
