@@ -5,8 +5,49 @@
 
 This is a small tool that helps to list the files you have changed (added/modifed/removed) in your branch.
 
+** Usage
 
-** Links
+To get the recent changes comparing to the default branch you can type:
+
+#+begin_src bash
+$ git-changed
+#+end_src
+
+*** Default branch
+
+Per default the script uses the ~init.defaultBranch~ if that is configured, and falls back to ~main~, you can override this setting by a command line parameter:
+
+#+begin_src bash
+$ git-changed --base development
+#+end_src
+
+Or you can set the configuration globally:
+
+#+begin_src bash
+$ git config --global changed.defaultBranch development
+#+end_src
+
+*** Filtering files with glob pattern
+
+#+begin_src bash
+$ git-changed '**/*.rs'
+#+end_src
+
+*** Using ~\0~ as file separator
+
+If you need to work with filenames that could contain spaces, then you can change the separator from ~\n~ to a ~NUL~ character
+
+#+begin_src bash
+$ git-changed -0
+#+end_src
+
+*** A more complex example
+
+#+begin_src bash
+$ git-changed -0 -b development '**/*.rs' | xargs -0 -n 1 rustc
+#+end_src
+
+** Dependencies
 
 - https://docs.rs/clap/latest/clap/
 - https://docs.rs/git2/latest/git2/
