@@ -1,0 +1,11 @@
+[package]
+name = "git-changed"
+version = "0.0.1"
+authors = ["István Karaszi <ikaraszi@gmail.com>"]
+keywords = ["git"]
+edition = "2021"
+
+[dependencies]
+clap = "4.0.18"
+git2 = "0.15"
+glob = "0.3.0"
