@@ -1,7 +1,7 @@
 #+title: git-changed
 #+options: toc:nil
 
-* git-changed
+** Description
 
 This is a small tool that helps to list the files you have changed (added/modifed/removed) in your branch.
 
