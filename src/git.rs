@@ -39,8 +39,8 @@ fn find_tree(repo: &Repository, oid: Oid) -> Tree {
 fn find_base_oid(repo: &Repository, base: String) -> Oid {
     let oid = Oid::from_str(base.as_str());
 
-    if oid.is_ok() {
-        return oid.unwrap();
+    if let Ok(value) = oid {
+        return value;
     }
 
     repo.find_branch(&base, BranchType::Local)
