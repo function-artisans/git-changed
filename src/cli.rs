@@ -36,7 +36,7 @@ fn default_branch() -> String {
 
     let branch = CONFIG_PATHS
         .into_iter()
-        .find_map(|path| match config.get_entry(&path) {
+        .find_map(|path| match config.get_entry(path) {
             Ok(entry) => entry.value().map(str::to_string),
             Err(_e) => None,
         });
