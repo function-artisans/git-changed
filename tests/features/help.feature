@@ -16,5 +16,5 @@ Feature: Help
         -0, --print0       Use NUL characters as separators (character code 0)
         -b, --base <base>  Use this commit instead of the default branch
         -e, --exist        Filter files that still exist
-        -h, --help         Print help information
+        -h, --help         Print help
       """
