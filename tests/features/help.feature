@@ -2,10 +2,7 @@ Feature: Help
 
   Scenario: If the user asks for help
     Given an empty directory
-    When the user executes the tool like
-      """
-      git-changed -h
-      """
+    When the user executes the tool like: "git-changed -h"
     Then it fails with the following error
       """
       Lists files modified since branching off

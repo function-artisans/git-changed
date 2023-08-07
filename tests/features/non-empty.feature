@@ -2,57 +2,30 @@ Feature: Non-empty git repository
 
   Background: An empty git repository
     Given an empty directory
-    When the user executes the command
-    """
-    git init .
-    """
-    And the user executes the command
-    """
-    git config user.name 'John Doe'
-    """
-    And the user executes the command
-    """
-    git config user.email 'jdoe@example.com'
-    """
-    And the user executes the command
-    """
-    git commit --allow-empty --message 'Initial commit'
-    """
-    And the user executes the command
-    """
-    touch README.md
-    """
-    And the user executes the command
-    """
-    git add README.md
-    """
+    When the user executes the command: "git init ."
+    And the user executes the command: "git config user.name 'John Doe'"
+    And the user executes the command: "git config user.email 'jdoe@example.com'"
+    And the user executes the command: "git commit --allow-empty --message 'Initial commit'"
+    And the user executes the command: "touch README.md"
+    And the user executes the command: "git add README.md"
 
     Rule: With uncommitted changes
 
       Scenario: It displays the changes
-        When the user executes the tool like
-          """
-          git-changed
-          """
+        When the user executes the tool like: "git-changed"
         Then it succeeds with the following output
           """
           README.md
           """
 
       Scenario: It does not display non-matching changes
-        When the user executes the tool like
-          """
-          git-changed *.txt
-          """
+        When the user executes the tool like: "git-changed *.txt"
         Then it succeeds with the following output
           """
           """
 
       Scenario: It display matching changes
-        When the user executes the tool like
-          """
-          git-changed *.md
-          """
+        When the user executes the tool like: "git-changed *.md"
         Then it succeeds with the following output
           """
           README.md
@@ -61,16 +34,10 @@ Feature: Non-empty git repository
     Rule: With committed changes
 
       Background: With committed changes
-        When the user executes the command
-          """
-          git commit --message 'Adding README'
-          """
+        When the user executes the command: "git commit --message 'Adding README'"
 
       Scenario: It displays nothing if there are no changes
-        When the user executes the tool like
-          """
-          git-changed
-          """
+        When the user executes the tool like: "git-changed"
         Then it succeeds with the following output
           """
           """
@@ -78,35 +45,23 @@ Feature: Non-empty git repository
       Rule: With uncommited changes
 
         Background: With uncommited changes
-          When the user executes the command
-            """
-            dd if=/dev/random of=README.md count=1
-            """
+          When the user executes the command: "dd if=/dev/random of=README.md count=1"
 
           Scenario: It displays the uncommited changes
-            When the user executes the tool like
-              """
-              git-changed
-              """
+            When the user executes the tool like: "git-changed"
             Then it succeeds with the following output
               """
               README.md
               """
 
           Scenario: It does not display non-matching changes
-            When the user executes the tool like
-              """
-              git-changed *.txt
-              """
+            When the user executes the tool like: "git-changed *.txt"
             Then it succeeds with the following output
               """
               """
 
           Scenario: It display matching changes
-            When the user executes the tool like
-              """
-              git-changed *.md
-              """
+            When the user executes the tool like: "git-changed *.md"
             Then it succeeds with the following output
               """
               README.md

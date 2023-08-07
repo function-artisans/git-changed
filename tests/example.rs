@@ -55,11 +55,11 @@ fn init_directory(world: &mut GitWorld) {
     world.directory = directory;
 }
 
-#[when("the user executes the command")]
-fn execute_command(world: &mut GitWorld, step: &Step) {
-    let command = split(&get_doc_string(step)).expect("Could not parse command");
+#[when(expr = "the user executes the command: {string}")]
+fn execute_command(world: &mut GitWorld, command: String) {
+    let command_parts = split(command.as_str()).expect("Could not parse command");
 
-    let (program, args) = command.split_at(1);
+    let (program, args) = command_parts.split_at(1);
 
     let output = Command::new(program.first().expect("Could not get the command"))
         .current_dir(world.directory.clone())
@@ -70,9 +70,9 @@ fn execute_command(world: &mut GitWorld, step: &Step) {
     assert!(output.status.success());
 }
 
-#[when("the user executes the tool like")]
-fn execute(world: &mut GitWorld, step: &Step) {
-    world.command = get_doc_string(step);
+#[when(expr = "the user executes the tool like: {string}")]
+fn execute(world: &mut GitWorld, command: String) {
+    world.command = command;
 }
 
 #[then("it fails with the following error")]
