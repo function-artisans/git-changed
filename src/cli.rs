@@ -41,7 +41,7 @@ fn default_branch() -> String {
 }
 
 fn command() -> Command {
-    Command::new("git-changes")
+    Command::new("git-changed")
         .about("Lists files modified since branching off")
         .args([
             Arg::new("null")
