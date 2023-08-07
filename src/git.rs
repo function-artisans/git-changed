@@ -50,7 +50,7 @@ fn find_base_oid(repo: &Repository, base: String) -> Result<Oid> {
         .with_context(|| format!("Failed to fetch branch {}", base))
 }
 
-fn committed_changes(repo: &Repository, base: String) -> Result<Vec<String>> {
+fn committed_changes(repo: &Repository, base: &String) -> Result<Vec<String>> {
     let base_oid = find_base_oid(repo, base.to_string())?;
 
     let head_oid = repo.head()?.target().context("Could not get oid")?;
@@ -81,7 +81,7 @@ fn map_new_files(delta: DiffDelta) -> Result<String> {
     Ok(path)
 }
 
-pub fn changes(base: String) -> Result<HashSet<String>> {
+pub fn changes(base: &String) -> Result<HashSet<String>> {
     let cwd = env::current_dir()?;
 
     let repo = Repository::open(cwd.clone())

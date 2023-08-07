@@ -6,7 +6,7 @@ mod cli;
 mod git;
 
 fn execute(options: Options) -> Result<()> {
-    let changes = git::changes(options.base)?;
+    let changes = git::changes(&options.base)?;
     let separator = if options.null { '\0' } else { '\n' };
 
     for file in &changes {
@@ -19,7 +19,7 @@ fn execute(options: Options) -> Result<()> {
 }
 
 #[cfg(test)]
-pub fn from(cmd: String) -> Result<()> {
+pub fn from(cmd: &String) -> Result<()> {
     let options = cli::get_options_from(cmd)?;
 
     execute(options)

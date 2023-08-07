@@ -79,7 +79,7 @@ fn execute(world: &mut GitWorld, command: String) {
 fn assert_failure(world: &mut GitWorld, step: &Step) {
     let expected_error = get_doc_string(step);
 
-    let result = main::from(world.command.clone());
+    let result = main::from(&world.command);
 
     assert!(result.is_err());
     assert_eq!(result.unwrap_err().to_string().trim(), expected_error);
@@ -92,7 +92,7 @@ fn assert_success(world: &mut GitWorld, step: &Step) {
     let actual_output = capture_stdout(|| {
         env::set_current_dir(&world.directory).expect("Could not change to directory");
 
-        main::from(world.command.clone()).expect("Could not execute");
+        main::from(&world.command).expect("Could not execute");
     });
 
     assert_eq!(expected_output, actual_output.trim());
