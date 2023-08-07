@@ -54,6 +54,12 @@ Feature: Non-empty git repository
               README.md
               """
 
+          Scenario: It filters for existing files when requested
+            When the user executes the tool like: "git-changed -e"
+            Then it succeeds with the following output
+              """
+              """
+
       Rule: With uncommited changes
 
         Background: With uncommited changes

@@ -15,14 +15,15 @@ pub struct Options {
     pub pattern: Pattern,
     pub base: String,
     pub null: bool,
+    pub exist: bool,
 }
 
 impl fmt::Display for Options {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "pattern: {}, base: {}, null: {}",
-            self.pattern, self.base, self.null
+            "pattern: {}, base: {}, null: {}, exist: {}",
+            self.pattern, self.base, self.null, self.exist
         )
     }
 }
@@ -53,6 +54,11 @@ fn command() -> Command {
                 .short('b')
                 .long("base")
                 .help("Use this commit instead of the default branch"),
+            Arg::new("exist")
+                .short('e')
+                .long("exist")
+                .help("Filter files that still exist")
+                .action(ArgAction::SetTrue),
             Arg::new("glob")
                 .default_value("**/*")
                 .index(1)
@@ -77,10 +83,16 @@ fn matches_to_options(matches: ArgMatches) -> Options {
         None => false,
     };
 
+    let exist = match matches.get_one::<bool>("exist") {
+        Some(value) => value.to_owned(),
+        None => false,
+    };
+
     Options {
         pattern,
         base,
         null,
+        exist,
     }
 }
 

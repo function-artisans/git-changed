@@ -44,6 +44,14 @@ If you need to work with filenames that could contain spaces, then you can chang
 $ git-changed -0
 #+end_src
 
+*** Filtering existing files only
+
+Some tools may not handle files that no longer exist. With this option, you can easily filter out non-existing files, ensuring reliable processing.
+
+#+begin_src bash
+$ git-changed -e
+#+end_src
+
 *** A more complex example
 
 #+begin_src bash
