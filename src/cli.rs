@@ -1,34 +1,30 @@
+use anyhow::Result;
 use clap::builder::Arg;
 use clap::builder::ArgAction;
 use clap::builder::Command;
 use clap::ArgMatches;
 use git2::Config;
 use glob::Pattern;
-
-use crate::Options;
+use std::fmt;
 
 const CONFIG_PATHS: [&str; 2] = ["changed.defaultBranch", "init.defaultBranch"];
 const DEFAULT_BRANCH: &str = "main";
 
-fn arg_matches() -> ArgMatches {
-    Command::new("git-changes")
-        .about("Get the recently changed files since a branch started")
-        .args([
-            Arg::new("null")
-                .short('0')
-                .long("print0")
-                .help("Use NUL characters as separators (character code 0)")
-                .action(ArgAction::SetTrue),
-            Arg::new("base")
-                .short('b')
-                .long("base")
-                .help("Use this commit instead of the default branch"),
-            Arg::new("glob")
-                .default_value("**/*")
-                .index(1)
-                .help("Use this glob to filter files"),
-        ])
-        .get_matches()
+#[derive(Debug, Clone)]
+pub struct Options {
+    pub pattern: Pattern,
+    pub base: String,
+    pub null: bool,
+}
+
+impl fmt::Display for Options {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "pattern: {}, base: {}, null: {}",
+            self.pattern, self.base, self.null
+        )
+    }
 }
 
 fn default_branch() -> String {
@@ -44,21 +40,39 @@ fn default_branch() -> String {
     branch.unwrap_or(DEFAULT_BRANCH.to_owned())
 }
 
-pub fn options() -> Options {
-    let m = arg_matches();
+fn command() -> Command {
+    Command::new("git-changes")
+        .about("Lists files modified since branching off")
+        .args([
+            Arg::new("null")
+                .short('0')
+                .long("print0")
+                .help("Use NUL characters as separators (character code 0)")
+                .action(ArgAction::SetTrue),
+            Arg::new("base")
+                .short('b')
+                .long("base")
+                .help("Use this commit instead of the default branch"),
+            Arg::new("glob")
+                .default_value("**/*")
+                .index(1)
+                .help("Use this glob to filter files"),
+        ])
+}
 
-    let glob = m
+fn matches_to_options(matches: ArgMatches) -> Options {
+    let glob = matches
         .get_one::<String>("glob")
         .expect("Default value is missing for glob");
 
     let pattern = Pattern::new(glob).expect("Valid glob required");
 
-    let base = match m.get_one::<String>("base") {
+    let base = match matches.get_one::<String>("base") {
         Some(value) => value.to_owned(),
         None => default_branch(),
     };
 
-    let null = match m.get_one::<bool>("null") {
+    let null = match matches.get_one::<bool>("null") {
         Some(value) => value.to_owned(),
         None => false,
     };
@@ -68,4 +82,19 @@ pub fn options() -> Options {
         base,
         null,
     }
+}
+
+#[cfg(test)]
+pub fn get_options_from(cmd: String) -> Result<Options> {
+    let args = cmd.split(' ');
+
+    let matches = command().try_get_matches_from(args)?;
+
+    Ok(matches_to_options(matches))
+}
+
+pub fn get_options() -> Result<Options> {
+    let matches = command().try_get_matches()?;
+
+    Ok(matches_to_options(matches))
 }
