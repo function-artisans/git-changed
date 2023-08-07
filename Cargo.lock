@@ -425,7 +425,6 @@ dependencies = [
  "futures",
  "git2",
  "glob",
- "itertools",
  "shlex",
  "stdio-override",
  "tempfile",
