@@ -42,6 +42,18 @@ Feature: Non-empty git repository
           """
           """
 
+      Rule: When the changed files does not exist anymore
+
+        Background: With deleted files
+          When the user executes the command: "rm README.md"
+
+          Scenario: It displays the removed files
+            When the user executes the tool like: "git-changed"
+            Then it succeeds with the following output
+              """
+              README.md
+              """
+
       Rule: With uncommited changes
 
         Background: With uncommited changes
