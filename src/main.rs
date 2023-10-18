@@ -1,23 +1,52 @@
+use self::cli::Options;
+use anyhow::Result;
+use std::{path::Path, process};
+
 mod cli;
 mod git;
 
-use glob::Pattern;
+fn matches(file: &String, options: &Options) -> bool {
+    if !options.pattern.matches(file) {
+        return false;
+    }
 
-pub struct Options {
-    pattern: Pattern,
-    base: String,
-    null: bool,
+    if !options.exist {
+        return true;
+    }
+
+    Path::new(file).exists()
 }
 
-fn main() {
-    let options = cli::options();
-
-    let changes = git::changes(options.base);
+fn execute(options: Options) -> Result<()> {
+    let changes = git::changes(&options.base)?;
     let separator = if options.null { '\0' } else { '\n' };
 
     for file in &changes {
-        if options.pattern.matches(file) {
+        if matches(file, &options) {
             print!("{}{}", file, separator);
+        }
+    }
+
+    Ok(())
+}
+
+#[cfg(test)]
+pub fn from(cmd: &String) -> Result<()> {
+    let options = cli::get_options_from(cmd)?;
+
+    execute(options)
+}
+
+fn main() -> Result<()> {
+    let options = cli::get_options()?;
+
+    match execute(options) {
+        Ok(()) => {
+            process::exit(0);
+        }
+        Err(error) => {
+            eprintln!("{}", error);
+            process::exit(1);
         }
     }
 }
