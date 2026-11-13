@@ -1,5 +1,6 @@
 use anyhow::Context;
 use anyhow::Result;
+use git2::Commit;
 use git2::DiffDelta;
 use git2::ErrorCode;
 use git2::Oid;
@@ -70,15 +71,15 @@ fn default_branch(repo: &Repository) -> Result<String> {
 }
 
 fn committed_changes(repo: &Repository, base: &str) -> Result<Vec<String>> {
-    let base_oid = find_commit_oid(repo, base)?;
-    let head_oid = find_commit_oid(repo, "HEAD")?;
+    let base_commit = find_commit(repo, base)?;
+    let head_commit = find_commit(repo, "HEAD")?;
 
     let merge_base_oid = repo
-        .merge_base(base_oid, head_oid)
+        .merge_base(base_commit.id(), head_commit.id())
         .with_context(|| format!("Cannot find a merge base of {base} and HEAD"))?;
 
     let old_tree = find_tree(repo, merge_base_oid)?;
-    let new_tree = find_tree(repo, head_oid)?;
+    let new_tree = head_commit.tree().context("Cannot find the tree of HEAD")?;
 
     let diff = repo
         .diff_tree_to_tree(Some(&old_tree), Some(&new_tree), None)
@@ -87,13 +88,10 @@ fn committed_changes(repo: &Repository, base: &str) -> Result<Vec<String>> {
     diff.deltas().map(changed_path).collect()
 }
 
-fn find_commit_oid(repo: &Repository, revision: &str) -> Result<Oid> {
-    let commit = repo
-        .revparse_single(revision)
+fn find_commit<'repo>(repo: &'repo Repository, revision: &str) -> Result<Commit<'repo>> {
+    repo.revparse_single(revision)
         .and_then(|object| object.peel_to_commit())
-        .with_context(|| format!("Cannot find the commit of {revision}"))?;
-
-    Ok(commit.id())
+        .with_context(|| format!("Cannot find the commit of {revision}"))
 }
 
 fn find_tree(repo: &Repository, oid: Oid) -> Result<Tree<'_>> {
