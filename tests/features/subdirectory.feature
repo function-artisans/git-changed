@@ -10,16 +10,24 @@ Feature: Run the tool in a subdirectory
     And the user executes the command: "touch README.md src/main.rs"
     And the user executes the command: "git add README.md src/main.rs"
 
-  Scenario: It displays the changes of the repository
+  Scenario: It displays all changes relative to the subdirectory
+    When the user executes the tool in "src" like: "git-changed"
+    Then it succeeds with the following output
+      """
+      ../README.md
+      main.rs
+      """
+
+  Scenario: It matches the glob against the relative path
     When the user executes the tool in "src" like: "git-changed *.rs"
     Then it succeeds with the following output
       """
-      src/main.rs
+      main.rs
       """
 
-  Scenario: It finds the existing files from the root of the repository
-    When the user executes the tool in "src" like: "git-changed -e *.md"
+  Scenario: It finds the existing files from the subdirectory
+    When the user executes the tool in "src" like: "git-changed -e ../*.md"
     Then it succeeds with the following output
       """
-      README.md
+      ../README.md
       """

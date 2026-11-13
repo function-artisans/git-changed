@@ -7,16 +7,30 @@ use git2::Repository;
 use git2::StatusOptions;
 use git2::Tree;
 use std::collections::BTreeSet;
-use std::env;
+use std::path::Path;
+use std::path::PathBuf;
 
 const CONFIG_PATHS: [&str; 2] = ["changed.defaultBranch", "init.defaultBranch"];
 const DEFAULT_BRANCH: &str = "main";
 
-pub fn open_repository() -> Result<Repository> {
-    let cwd = env::current_dir()?;
+pub fn open_repository(directory: &Path) -> Result<Repository> {
+    Repository::discover(directory)
+        .with_context(|| format!("Cannot find a repository at {}", directory.display()))
+}
 
-    Repository::discover(&cwd)
-        .with_context(|| format!("Cannot find a repository at {}", cwd.display()))
+pub fn subdirectory(repo: &Repository, directory: &Path) -> Result<PathBuf> {
+    let root = repo
+        .workdir()
+        .context("The repository has no working directory")?;
+
+    let root = canonical(root)?;
+    let directory = canonical(directory)?;
+
+    let subdirectory = directory
+        .strip_prefix(&root)
+        .with_context(|| format!("{} is not in {}", directory.display(), root.display()))?;
+
+    Ok(subdirectory.to_path_buf())
 }
 
 pub fn changes(repo: &Repository, base: Option<&str>) -> Result<BTreeSet<String>> {
@@ -31,6 +45,11 @@ pub fn changes(repo: &Repository, base: Option<&str>) -> Result<BTreeSet<String>
     let files = committed.chain(uncommitted);
 
     Ok(BTreeSet::from_iter(files))
+}
+
+fn canonical(path: &Path) -> Result<PathBuf> {
+    path.canonicalize()
+        .with_context(|| format!("Cannot resolve the path {}", path.display()))
 }
 
 fn default_branch(repo: &Repository) -> Result<String> {
