@@ -1,6 +1,5 @@
 use anyhow::Context;
 use anyhow::Result;
-use git2::BranchType;
 use git2::DiffDelta;
 use git2::Oid;
 use git2::Repository;
@@ -37,21 +36,17 @@ fn find_tree(repo: &Repository, oid: Oid) -> Result<Tree<'_>> {
         .with_context(|| format!("Failed to find tree for {}", oid))
 }
 
-fn find_base_oid(repo: &Repository, base: String) -> Result<Oid> {
-    let oid = Oid::from_str(base.as_str());
+fn find_base_oid(repo: &Repository, base: &str) -> Result<Oid> {
+    let commit = repo
+        .revparse_single(base)
+        .and_then(|object| object.peel_to_commit())
+        .with_context(|| format!("Cannot find the commit of {base}"))?;
 
-    if let Ok(value) = oid {
-        return Ok(value);
-    }
-
-    repo.find_branch(&base, BranchType::Local)?
-        .get()
-        .target()
-        .with_context(|| format!("Failed to fetch branch {}", base))
+    Ok(commit.id())
 }
 
 fn committed_changes(repo: &Repository, base: &String) -> Result<Vec<String>> {
-    let base_oid = find_base_oid(repo, base.to_string())?;
+    let base_oid = find_base_oid(repo, base)?;
 
     let head_oid = repo.head()?.target().context("Could not get oid")?;
 
