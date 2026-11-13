@@ -11,7 +11,11 @@ use std::process::Stdio;
 use tempfile::TempDir;
 
 fn main() {
-    futures::executor::block_on(GitWorld::cucumber().run_and_exit("tests/features"));
+    futures::executor::block_on(
+        GitWorld::cucumber()
+            .fail_on_skipped()
+            .run_and_exit("tests/features"),
+    );
 }
 
 #[derive(Debug, World)]
