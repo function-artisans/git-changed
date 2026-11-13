@@ -13,8 +13,7 @@ use std::process;
 mod cli;
 mod git;
 
-// A `*` in the glob does not match a `/`, like in a shell.
-const MATCH_OPTIONS: MatchOptions = MatchOptions {
+const SHELL_MATCH_OPTIONS: MatchOptions = MatchOptions {
     case_sensitive: true,
     require_literal_separator: true,
     require_literal_leading_dot: false,
@@ -70,7 +69,7 @@ fn relative_path(file: &Path, directory: &Path) -> PathBuf {
 }
 
 fn is_selected(file: &Path, options: &Options) -> bool {
-    if !options.glob.matches_path_with(file, MATCH_OPTIONS) {
+    if !options.glob.matches_path_with(file, SHELL_MATCH_OPTIONS) {
         return false;
     }
 
