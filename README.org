@@ -97,11 +97,7 @@ Or only for the current repository:
 $ git config changed.defaultBranch development
 #+end_src
 
-The value can be any revision. If your local ~main~ is older than the remote one, the tool also lists the files that changed on ~main~ after your local copy. To compare with the remote branch, set:
-
-#+begin_src bash
-$ git config changed.defaultBranch origin/main
-#+end_src
+The value can be any revision, for example a branch, a tag, or ~upstream/main~.
 
 *** Filtering files with glob pattern
 
