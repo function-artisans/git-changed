@@ -60,12 +60,12 @@ Feature: Non-empty git repository
               """
               """
 
-      Rule: With uncommited changes
+      Rule: With uncommitted changes
 
-        Background: With uncommited changes
+        Background: With uncommitted changes
           When the user executes the command: "dd if=/dev/random of=README.md count=1"
 
-          Scenario: It displays the uncommited changes
+          Scenario: It displays the uncommitted changes
             When the user executes the tool like: "git-changed"
             Then it succeeds with the following output
               """
