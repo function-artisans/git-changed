@@ -30,13 +30,6 @@ fn execute(options: Options) -> Result<()> {
     Ok(())
 }
 
-#[cfg(test)]
-pub fn from(cmd: &str) -> Result<()> {
-    let options = cli::get_options_from(cmd)?;
-
-    execute(options)
-}
-
 fn main() -> Result<()> {
     let options = cli::get_options()?;
 

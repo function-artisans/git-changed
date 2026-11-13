@@ -96,15 +96,6 @@ fn matches_to_options(matches: ArgMatches) -> Options {
     }
 }
 
-#[cfg(test)]
-pub fn get_options_from(cmd: &str) -> Result<Options> {
-    let args = cmd.split(' ');
-
-    let matches = command().try_get_matches_from(args)?;
-
-    Ok(matches_to_options(matches))
-}
-
 pub fn get_options() -> Result<Options> {
     let matches = command().try_get_matches()?;
 
