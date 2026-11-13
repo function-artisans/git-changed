@@ -6,10 +6,14 @@ use glob::Pattern;
 
 #[derive(Debug)]
 pub struct Options {
-    pub pattern: Pattern,
+    pub glob: Pattern,
     pub base: Option<String>,
     pub null: bool,
     pub exist: bool,
+}
+
+pub fn get_options() -> Options {
+    matches_to_options(command().get_matches())
 }
 
 fn command() -> Command {
@@ -28,7 +32,7 @@ fn command() -> Command {
             Arg::new("exist")
                 .short('e')
                 .long("exist")
-                .help("Filter files that still exist")
+                .help("Show only the files that still exist")
                 .action(ArgAction::SetTrue),
             Arg::new("glob")
                 .default_value("**/*")
@@ -39,21 +43,13 @@ fn command() -> Command {
 }
 
 fn matches_to_options(matches: ArgMatches) -> Options {
-    let pattern = matches
-        .get_one::<Pattern>("glob")
-        .cloned()
-        .expect("The glob has a default value");
-
-    let base = matches.get_one::<String>("base").cloned();
-
     Options {
-        pattern,
-        base,
+        glob: matches
+            .get_one::<Pattern>("glob")
+            .cloned()
+            .expect("The glob has a default value"),
+        base: matches.get_one::<String>("base").cloned(),
         null: matches.get_flag("null"),
         exist: matches.get_flag("exist"),
     }
-}
-
-pub fn get_options() -> Options {
-    matches_to_options(command().get_matches())
 }

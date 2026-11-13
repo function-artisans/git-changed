@@ -62,7 +62,7 @@ fn relative_path(file: &Path, directory: &Path) -> PathBuf {
 }
 
 fn is_selected(file: &Path, options: &Options) -> bool {
-    if !options.pattern.matches_path(file) {
+    if !options.glob.matches_path(file) {
         return false;
     }
 
