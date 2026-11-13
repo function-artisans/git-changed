@@ -25,6 +25,12 @@ Feature: Run the tool in a subdirectory
       main.rs
       """
 
+  Scenario: It does not match a file in another directory with a star
+    When the user executes the tool in "src" like: "git-changed *.md"
+    Then it succeeds with the following output
+      """
+      """
+
   Scenario: It finds the existing files from the subdirectory
     When the user executes the tool in "src" like: "git-changed -e ../*.md"
     Then it succeeds with the following output
