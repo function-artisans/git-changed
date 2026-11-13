@@ -3,24 +3,13 @@ use clap::builder::ArgAction;
 use clap::builder::Command;
 use clap::ArgMatches;
 use glob::Pattern;
-use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Options {
     pub pattern: Pattern,
     pub base: Option<String>,
     pub null: bool,
     pub exist: bool,
-}
-
-impl fmt::Display for Options {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "pattern: {}, base: {:?}, null: {}, exist: {}",
-            self.pattern, self.base, self.null, self.exist
-        )
-    }
 }
 
 fn command() -> Command {
@@ -57,21 +46,11 @@ fn matches_to_options(matches: ArgMatches) -> Options {
 
     let base = matches.get_one::<String>("base").cloned();
 
-    let null = match matches.get_one::<bool>("null") {
-        Some(value) => value.to_owned(),
-        None => false,
-    };
-
-    let exist = match matches.get_one::<bool>("exist") {
-        Some(value) => value.to_owned(),
-        None => false,
-    };
-
     Options {
         pattern,
         base,
-        null,
-        exist,
+        null: matches.get_flag("null"),
+        exist: matches.get_flag("exist"),
     }
 }
 

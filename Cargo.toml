@@ -16,8 +16,6 @@ cucumber = "0.19"
 futures = "0.3"
 tempfile = "3.5.0"
 shlex = "1.1.0"
-# fake = "2.5.0"
-# rand = "0.8.5"
 
 [[test]]
 name = "features"
