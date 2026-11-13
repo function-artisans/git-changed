@@ -1,7 +1,10 @@
 use self::cli::Options;
 use anyhow::Context;
 use anyhow::Result;
-use std::{path::Path, process};
+use std::io;
+use std::io::Write;
+use std::path::Path;
+use std::process;
 
 mod cli;
 mod git;
@@ -26,19 +29,30 @@ fn execute(options: Options) -> Result<()> {
     let changes = git::changes(&repo, &options.base)?;
     let separator = if options.null { '\0' } else { '\n' };
 
-    for file in &changes {
-        if matches(file, root, &options) {
-            print!("{}{}", file, separator);
-        }
+    let mut stdout = io::stdout().lock();
+    for file in changes.iter().filter(|file| matches(file, root, &options)) {
+        write!(stdout, "{file}{separator}")?;
     }
 
+    stdout.flush()?;
+
     Ok(())
+}
+
+fn is_broken_pipe(error: &anyhow::Error) -> bool {
+    error
+        .downcast_ref::<io::Error>()
+        .is_some_and(|error| error.kind() == io::ErrorKind::BrokenPipe)
 }
 
 fn main() {
     let options = cli::get_options();
 
     if let Err(error) = execute(options) {
+        if is_broken_pipe(&error) {
+            return;
+        }
+
         eprintln!("{error}");
         process::exit(1);
     }

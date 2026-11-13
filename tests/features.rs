@@ -7,6 +7,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::process::Output;
+use std::process::Stdio;
 use tempfile::TempDir;
 
 fn main() {
@@ -54,6 +55,23 @@ fn run_tool_in(world: &mut GitWorld, subdirectory: String, command: String) {
     world.output = Some(output);
 }
 
+#[when(expr = "the user executes the tool with a closed output like: {string}")]
+fn run_tool_with_closed_output(world: &mut GitWorld, command: String) {
+    let (program, args) = split_command(&command);
+    assert_eq!(program, "git-changed", "This step runs only git-changed");
+
+    let mut child = world
+        .command_in(".", env!("CARGO_BIN_EXE_git-changed"))
+        .args(args)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("Cannot start the tool");
+    drop(child.stdout.take());
+
+    world.output = Some(child.wait_with_output().expect("Cannot wait for the tool"));
+}
+
 #[then("it fails with the following error")]
 fn assert_failure(world: &mut GitWorld, step: &Step) {
     let output = world.tool_output();
@@ -91,12 +109,16 @@ impl GitWorld {
     }
 
     fn run_in(&self, subdirectory: &str, program: &str, args: &[String]) -> Output {
-        let directory = self.directory.path().join(subdirectory);
-
-        command_without_user_config(program, self.home.path(), &directory)
+        self.command_in(subdirectory, program)
             .args(args)
             .output()
             .unwrap_or_else(|error| panic!("Cannot run {program}: {error}"))
+    }
+
+    fn command_in(&self, subdirectory: &str, program: &str) -> Command {
+        let directory = self.directory.path().join(subdirectory);
+
+        command_without_user_config(program, self.home.path(), &directory)
     }
 
     fn tool_output(&self) -> &Output {

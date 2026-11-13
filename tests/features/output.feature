@@ -18,3 +18,9 @@ Feature: Output
       d.md
       e.md
       """
+
+  Scenario: It stops without an error if the reader closes the output
+    When the user executes the tool with a closed output like: "git-changed"
+    Then it succeeds with the following output
+      """
+      """
