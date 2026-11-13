@@ -16,6 +16,13 @@ To get the recent changes comparing to the default branch you can type:
 $ git-changed
 #+end_src
 
+In a subdirectory, the tool prints the paths relative to that directory, like ~git status~. The glob also matches the relative path:
+
+#+begin_src bash
+$ cd src
+$ git-changed '*.rs' | xargs rustfmt
+#+end_src
+
 *** Default branch
 
 Per default the script uses the ~init.defaultBranch~ if that is configured, and falls back to ~main~, you can override this setting by a command line parameter:
@@ -28,6 +35,12 @@ Or you can set the configuration globally:
 
 #+begin_src bash
 $ git config --global changed.defaultBranch development
+#+end_src
+
+Or only for the current repository:
+
+#+begin_src bash
+$ git config changed.defaultBranch development
 #+end_src
 
 *** Filtering files with glob pattern

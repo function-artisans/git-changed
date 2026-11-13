@@ -3,9 +3,9 @@ Feature: Help
   Scenario: If the user asks for help
     Given an empty directory
     When the user executes the tool like: "git-changed -h"
-    Then it fails with the following error
+    Then it succeeds with the following output
       """
-      Error: Lists files modified since branching off
+      Lists files modified since branching off
 
       Usage: git-changed [OPTIONS] [glob]
 

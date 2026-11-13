@@ -7,6 +7,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::process::Output;
+use std::process::Stdio;
 use tempfile::TempDir;
 
 fn main() {
@@ -41,12 +42,32 @@ fn run_command(world: &mut GitWorld, command: String) {
 
 #[when(expr = "the user executes the tool like: {string}")]
 fn run_tool(world: &mut GitWorld, command: String) {
-    let (program, args) = split_command(&command);
-    assert_eq!(program, "git-changed", "This step runs only git-changed");
+    run_tool_in(world, ".".to_string(), command);
+}
 
-    let output = world.run(env!("CARGO_BIN_EXE_git-changed"), &args);
+#[when(expr = "the user executes the tool in {string} like: {string}")]
+fn run_tool_in(world: &mut GitWorld, subdirectory: String, command: String) {
+    let args = tool_args(&command);
+
+    let output = world.run_in(&subdirectory, env!("CARGO_BIN_EXE_git-changed"), &args);
 
     world.output = Some(output);
+}
+
+#[when(expr = "the user executes the tool with a closed output like: {string}")]
+fn run_tool_with_closed_output(world: &mut GitWorld, command: String) {
+    let args = tool_args(&command);
+
+    let mut child = world
+        .command_in(".", env!("CARGO_BIN_EXE_git-changed"))
+        .args(args)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("Cannot start the tool");
+    drop(child.stdout.take());
+
+    world.output = Some(child.wait_with_output().expect("Cannot wait for the tool"));
 }
 
 #[then("it fails with the following error")]
@@ -61,12 +82,28 @@ fn assert_failure(world: &mut GitWorld, step: &Step) {
 fn assert_success(world: &mut GitWorld, step: &Step) {
     let output = world.tool_output();
 
+    assert_succeeded(output);
+    assert_eq!(text(&output.stdout), expected_text(step));
+}
+
+#[then("it succeeds with the following NUL-separated output")]
+fn assert_success_with_nul(world: &mut GitWorld, step: &Step) {
+    let output = world.tool_output();
+    let expected: String = expected_text(step)
+        .lines()
+        .map(|line| format!("{line}\0"))
+        .collect();
+
+    assert_succeeded(output);
+    assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
+}
+
+fn assert_succeeded(output: &Output) {
     assert!(
         output.status.success(),
         "The tool failed: {}",
         text(&output.stderr)
     );
-    assert_eq!(text(&output.stdout), expected_text(step));
 }
 
 impl GitWorld {
@@ -82,10 +119,20 @@ impl GitWorld {
     }
 
     fn run(&self, program: &str, args: &[String]) -> Output {
-        command_without_user_config(program, self.home.path(), self.directory.path())
+        self.run_in(".", program, args)
+    }
+
+    fn run_in(&self, subdirectory: &str, program: &str, args: &[String]) -> Output {
+        self.command_in(subdirectory, program)
             .args(args)
             .output()
             .unwrap_or_else(|error| panic!("Cannot run {program}: {error}"))
+    }
+
+    fn command_in(&self, subdirectory: &str, program: &str) -> Command {
+        let directory = self.directory.path().join(subdirectory);
+
+        command_without_user_config(program, self.home.path(), &directory)
     }
 
     fn tool_output(&self) -> &Output {
@@ -111,6 +158,13 @@ fn write_global_config(home: &Path) {
     let config = "[init]\n\tdefaultBranch = main\n";
 
     fs::write(home.join(".gitconfig"), config).expect("Cannot write the global git config");
+}
+
+fn tool_args(command: &str) -> Vec<String> {
+    let (program, args) = split_command(command);
+    assert_eq!(program, "git-changed", "This step runs only git-changed");
+
+    args
 }
 
 fn split_command(command: &str) -> (String, Vec<String>) {
