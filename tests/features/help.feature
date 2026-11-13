@@ -5,7 +5,7 @@ Feature: Help
     When the user executes the tool like: "git-changed -h"
     Then it fails with the following error
       """
-      Lists files modified since branching off
+      Error: Lists files modified since branching off
 
       Usage: git-changed [OPTIONS] [glob]
 
