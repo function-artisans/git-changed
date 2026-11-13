@@ -6,6 +6,7 @@ Feature: Output
     And the user executes the command: "git config user.name 'John Doe'"
     And the user executes the command: "git config user.email 'jdoe@example.com'"
     And the user executes the command: "git commit --allow-empty --message 'Initial commit'"
+    And the user executes the command: "git update-ref refs/remotes/origin/main main"
     And the user executes the command: "touch c.md a.md e.md b.md d.md"
 
   Scenario: It displays the files in sorted order
