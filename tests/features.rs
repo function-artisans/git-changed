@@ -47,8 +47,7 @@ fn run_tool(world: &mut GitWorld, command: String) {
 
 #[when(expr = "the user executes the tool in {string} like: {string}")]
 fn run_tool_in(world: &mut GitWorld, subdirectory: String, command: String) {
-    let (program, args) = split_command(&command);
-    assert_eq!(program, "git-changed", "This step runs only git-changed");
+    let args = tool_args(&command);
 
     let output = world.run_in(&subdirectory, env!("CARGO_BIN_EXE_git-changed"), &args);
 
@@ -57,8 +56,7 @@ fn run_tool_in(world: &mut GitWorld, subdirectory: String, command: String) {
 
 #[when(expr = "the user executes the tool with a closed output like: {string}")]
 fn run_tool_with_closed_output(world: &mut GitWorld, command: String) {
-    let (program, args) = split_command(&command);
-    assert_eq!(program, "git-changed", "This step runs only git-changed");
+    let args = tool_args(&command);
 
     let mut child = world
         .command_in(".", env!("CARGO_BIN_EXE_git-changed"))
@@ -144,6 +142,13 @@ fn write_global_config(home: &Path) {
     let config = "[init]\n\tdefaultBranch = main\n";
 
     fs::write(home.join(".gitconfig"), config).expect("Cannot write the global git config");
+}
+
+fn tool_args(command: &str) -> Vec<String> {
+    let (program, args) = split_command(command);
+    assert_eq!(program, "git-changed", "This step runs only git-changed");
+
+    args
 }
 
 fn split_command(command: &str) -> (String, Vec<String>) {
