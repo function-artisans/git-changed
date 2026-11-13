@@ -32,17 +32,17 @@ fn command() -> Command {
                 .action(ArgAction::SetTrue),
             Arg::new("glob")
                 .default_value("**/*")
+                .value_parser(Pattern::new)
                 .index(1)
                 .help("Use this glob to filter files"),
         ])
 }
 
 fn matches_to_options(matches: ArgMatches) -> Options {
-    let glob = matches
-        .get_one::<String>("glob")
-        .expect("Default value is missing for glob");
-
-    let pattern = Pattern::new(glob).expect("Valid glob required");
+    let pattern = matches
+        .get_one::<Pattern>("glob")
+        .cloned()
+        .expect("The glob has a default value");
 
     let base = matches.get_one::<String>("base").cloned();
 
