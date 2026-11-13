@@ -31,7 +31,7 @@ fn uncommitted_changes(repo: &Repository) -> Result<Vec<String>> {
         .collect()
 }
 
-fn find_tree(repo: &Repository, oid: Oid) -> Result<Tree> {
+fn find_tree(repo: &Repository, oid: Oid) -> Result<Tree<'_>> {
     repo.find_commit(oid)?
         .tree()
         .with_context(|| format!("Failed to find tree for {}", oid))

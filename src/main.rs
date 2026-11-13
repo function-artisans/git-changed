@@ -31,7 +31,7 @@ fn execute(options: Options) -> Result<()> {
 }
 
 #[cfg(test)]
-pub fn from(cmd: &String) -> Result<()> {
+pub fn from(cmd: &str) -> Result<()> {
     let options = cli::get_options_from(cmd)?;
 
     execute(options)
