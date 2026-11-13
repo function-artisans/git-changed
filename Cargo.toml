@@ -1,6 +1,6 @@
 [package]
 name = "git-changed"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["István Karaszi <ikaraszi@gmail.com>"]
 description = "List the files that changed in the current git branch"
 license = "MIT"
