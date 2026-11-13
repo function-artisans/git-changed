@@ -81,14 +81,16 @@ fn map_new_files(delta: DiffDelta) -> Result<String> {
     Ok(path)
 }
 
-pub fn changes(base: &String) -> Result<HashSet<String>> {
+pub fn open_repository() -> Result<Repository> {
     let cwd = env::current_dir()?;
 
-    let repo = Repository::open(cwd.clone())
-        .with_context(|| format!("Could not open repository at {}", cwd.display()))?;
+    Repository::discover(&cwd)
+        .with_context(|| format!("Cannot find a repository at {}", cwd.display()))
+}
 
-    let committed = committed_changes(&repo, base)?.into_iter();
-    let uncommitted = uncommitted_changes(&repo)?.into_iter();
+pub fn changes(repo: &Repository, base: &String) -> Result<HashSet<String>> {
+    let committed = committed_changes(repo, base)?.into_iter();
+    let uncommitted = uncommitted_changes(repo)?.into_iter();
 
     let files = committed.chain(uncommitted);
 

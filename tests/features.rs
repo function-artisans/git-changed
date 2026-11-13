@@ -41,10 +41,15 @@ fn run_command(world: &mut GitWorld, command: String) {
 
 #[when(expr = "the user executes the tool like: {string}")]
 fn run_tool(world: &mut GitWorld, command: String) {
+    run_tool_in(world, ".".to_string(), command);
+}
+
+#[when(expr = "the user executes the tool in {string} like: {string}")]
+fn run_tool_in(world: &mut GitWorld, subdirectory: String, command: String) {
     let (program, args) = split_command(&command);
     assert_eq!(program, "git-changed", "This step runs only git-changed");
 
-    let output = world.run(env!("CARGO_BIN_EXE_git-changed"), &args);
+    let output = world.run_in(&subdirectory, env!("CARGO_BIN_EXE_git-changed"), &args);
 
     world.output = Some(output);
 }
@@ -82,7 +87,13 @@ impl GitWorld {
     }
 
     fn run(&self, program: &str, args: &[String]) -> Output {
-        command_without_user_config(program, self.home.path(), self.directory.path())
+        self.run_in(".", program, args)
+    }
+
+    fn run_in(&self, subdirectory: &str, program: &str, args: &[String]) -> Output {
+        let directory = self.directory.path().join(subdirectory);
+
+        command_without_user_config(program, self.home.path(), &directory)
             .args(args)
             .output()
             .unwrap_or_else(|error| panic!("Cannot run {program}: {error}"))

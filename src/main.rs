@@ -1,11 +1,12 @@
 use self::cli::Options;
+use anyhow::Context;
 use anyhow::Result;
 use std::{path::Path, process};
 
 mod cli;
 mod git;
 
-fn matches(file: &String, options: &Options) -> bool {
+fn matches(file: &str, root: &Path, options: &Options) -> bool {
     if !options.pattern.matches(file) {
         return false;
     }
@@ -14,15 +15,19 @@ fn matches(file: &String, options: &Options) -> bool {
         return true;
     }
 
-    Path::new(file).exists()
+    root.join(file).exists()
 }
 
 fn execute(options: Options) -> Result<()> {
-    let changes = git::changes(&options.base)?;
+    let repo = git::open_repository()?;
+    let root = repo
+        .workdir()
+        .context("The repository has no working directory")?;
+    let changes = git::changes(&repo, &options.base)?;
     let separator = if options.null { '\0' } else { '\n' };
 
     for file in &changes {
-        if matches(file, &options) {
+        if matches(file, root, &options) {
             print!("{}{}", file, separator);
         }
     }
