@@ -82,12 +82,28 @@ fn assert_failure(world: &mut GitWorld, step: &Step) {
 fn assert_success(world: &mut GitWorld, step: &Step) {
     let output = world.tool_output();
 
+    assert_succeeded(output);
+    assert_eq!(text(&output.stdout), expected_text(step));
+}
+
+#[then("it succeeds with the following NUL-separated output")]
+fn assert_success_with_nul(world: &mut GitWorld, step: &Step) {
+    let output = world.tool_output();
+    let expected: String = expected_text(step)
+        .lines()
+        .map(|line| format!("{line}\0"))
+        .collect();
+
+    assert_succeeded(output);
+    assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
+}
+
+fn assert_succeeded(output: &Output) {
     assert!(
         output.status.success(),
         "The tool failed: {}",
         text(&output.stderr)
     );
-    assert_eq!(text(&output.stdout), expected_text(step));
 }
 
 impl GitWorld {

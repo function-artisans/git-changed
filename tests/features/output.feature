@@ -24,3 +24,14 @@ Feature: Output
     Then it succeeds with the following output
       """
       """
+
+  Scenario: It separates the files with NUL characters
+    When the user executes the tool like: "git-changed -0"
+    Then it succeeds with the following NUL-separated output
+      """
+      a.md
+      b.md
+      c.md
+      d.md
+      e.md
+      """
