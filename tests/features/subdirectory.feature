@@ -31,3 +31,12 @@ Feature: Run the tool in a subdirectory
       """
       ../README.md
       """
+
+  Scenario: It goes up to the shared directory from a deeper subdirectory
+    When the user executes the command: "mkdir src/lib"
+    And the user executes the tool in "src/lib" like: "git-changed"
+    Then it succeeds with the following output
+      """
+      ../../README.md
+      ../main.rs
+      """
