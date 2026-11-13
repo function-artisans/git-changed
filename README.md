@@ -29,6 +29,14 @@ $ git-changed -e '**/*.rs' | xargs rustfmt
 
 `git-changed` does not run commands and does not manage hooks. It only lists the files, so you can use it in a terminal, in a hook, or in CI.
 
+## Install with Cargo
+
+Install the tool from [crates.io](https://crates.io/crates/git-changed):
+
+```bash
+$ cargo install git-changed
+```
+
 ## Install with Nix
 
 This project is a Nix flake. It gives you the `git-changed` package, an overlay and an app.
