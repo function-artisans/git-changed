@@ -3,9 +3,6 @@
 {
   packages = [
     pkgs.cargo-outdated
-    pkgs.pkg-config
-    pkgs.openssl
-    pkgs.zlib
   ];
 
   languages.rust = {
