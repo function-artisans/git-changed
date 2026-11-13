@@ -8,6 +8,36 @@ This is a small tool that helps to list the files you have changed (added/modifi
 This can be useful when working with large repositories, as you can run tools on a specific subset of files instead of the entire repository.
 It can be easily integrated into your workflow to streamline your development process.
 
+** Install with Nix
+
+This project is a Nix flake. It gives you the ~git-changed~ package, an overlay and an app.
+
+Run the tool without an installation:
+
+#+begin_src bash
+$ nix run github:function-artisans/git-changed
+#+end_src
+
+Add the flake to your own configuration:
+
+#+begin_src nix
+{
+  inputs.git-changed.url = "github:function-artisans/git-changed";
+}
+#+end_src
+
+Then take the package for your system:
+
+#+begin_src nix
+inputs.git-changed.packages.${system}.default
+#+end_src
+
+Or add the overlay and take ~pkgs.git-changed~:
+
+#+begin_src nix
+nixpkgs.overlays = [ inputs.git-changed.overlays.default ];
+#+end_src
+
 ** Usage
 
 To get the recent changes comparing to the default branch you can type:
