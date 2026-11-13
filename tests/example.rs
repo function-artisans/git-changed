@@ -12,6 +12,8 @@ use stdio_override::StdoutOverride;
 use tempfile::NamedTempFile;
 use uuid::Uuid;
 
+// The tests use only some functions of the binary. Do not report the other functions as dead code.
+#[allow(dead_code)]
 #[path = "../src/main.rs"]
 mod main;
 
@@ -47,7 +49,7 @@ fn init_directory(world: &mut GitWorld) {
     let dir = env::temp_dir();
     let uuid = Uuid::new_v4().to_string();
 
-    let name = format!("git-changed-{}", &uuid);
+    let name = format!("git-changed-{uuid}");
     let directory = dir.join(name);
 
     fs::create_dir_all(directory.clone()).expect("Could not create directory!");
