@@ -1,6 +1,7 @@
 use self::cli::Options;
 use anyhow::Context;
 use anyhow::Result;
+use glob::MatchOptions;
 use std::env;
 use std::io;
 use std::io::Write;
@@ -11,6 +12,12 @@ use std::process;
 
 mod cli;
 mod git;
+
+const SHELL_MATCH_OPTIONS: MatchOptions = MatchOptions {
+    case_sensitive: true,
+    require_literal_separator: true,
+    require_literal_leading_dot: false,
+};
 
 fn main() {
     let options = cli::get_options();
@@ -62,7 +69,7 @@ fn relative_path(file: &Path, directory: &Path) -> PathBuf {
 }
 
 fn is_selected(file: &Path, options: &Options) -> bool {
-    if !options.glob.matches_path(file) {
+    if !options.glob.matches_path_with(file, SHELL_MATCH_OPTIONS) {
         return false;
     }
 
