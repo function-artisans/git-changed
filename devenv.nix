@@ -17,7 +17,10 @@
     rustfmt.enable = true;
     clippy = {
       enable = true;
-      settings.denyWarnings = true;
+      settings = {
+        denyWarnings = true;
+        extraArgs = "--all-targets";
+      };
     };
     editorconfig-checker.enable = true;
     statix.enable = true;
