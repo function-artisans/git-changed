@@ -5,8 +5,30 @@
 
 This is a small tool that helps to list the files you have changed (added/modified/removed) in your git branch.
 
-This can be useful when working with large repositories, as you can run tools on a specific subset of files instead of the entire repository.
-It can be easily integrated into your workflow to streamline your development process.
+** Motivation
+
+The author wrote this tool for a project with very slow tests and tools. A full run took too long for each small change. The author wanted to run the tests and tools only on the files of the current branch.
+
+The tool lists these files:
+
+- the files from the commits since the branch left ~origin/main~
+- the files with uncommitted changes
+- the untracked files
+
+The tool only prints the list. Send the list to another tool:
+
+#+begin_src bash
+$ git-changed -e '**/*.rs' | xargs rustfmt
+#+end_src
+
+** Alternatives
+
+- ~git diff --name-only $(git merge-base origin/main HEAD)~ lists the committed and the uncommitted changes. It does not list the untracked files. Add ~git ls-files --others --exclude-standard~ for those.
+- lint-staged (https://github.com/lint-staged/lint-staged) runs commands on the staged files before a commit. It needs Node.js.
+- lefthook (https://github.com/evilmartians/lefthook) is a git hook manager. It gives ~{staged_files}~ and ~{push_files}~ to the commands. A ~lefthook~ command can also call ~git-changed~.
+- tj-actions/changed-files (https://github.com/tj-actions/changed-files) lists the changed files in GitHub Actions.
+
+~git-changed~ does not run commands and does not manage hooks. It only lists the files, so you can use it in a terminal, in a hook, or in CI.
 
 ** Install with Nix
 
@@ -55,7 +77,9 @@ $ git-changed '*.rs' | xargs rustfmt
 
 *** Default branch
 
-Per default the script uses the ~init.defaultBranch~ if that is configured, and falls back to ~main~, you can override this setting by a command line parameter:
+The tool compares your branch with ~origin/main~. It does not use your local ~main~ branch, because that branch can be old.
+
+To use a different base, give the ~--base~ option:
 
 #+begin_src bash
 $ git-changed --base development
@@ -101,7 +125,48 @@ Some tools may not handle files that no longer exist. With this option, you can 
 $ git-changed -e
 #+end_src
 
-*** A more complex example
+*** Examples
+
+Run only the specs of the branch. A new spec file is in the list before you run ~git add~:
+
+#+begin_src bash
+$ git-changed -e 'spec/**/*_spec.rb' | xargs bundle exec rspec
+#+end_src
+
+Lint the changed files. The ~-e~ option removes the deleted files, so the linter does not fail on a missing file:
+
+#+begin_src bash
+$ git-changed -e -0 '**/*.py' | xargs -0 ruff check
+#+end_src
+
+Run the tests again each time that you save a changed file. entr (https://github.com/eradman/entr) reads the list of files to watch from standard input:
+
+#+begin_src bash
+$ git-changed -e '**/*.rs' | entr -c cargo test
+#+end_src
+
+Open all changed files in the editor:
+
+#+begin_src bash
+$ vim $(git-changed -e)
+#+end_src
+
+Select one changed file with fzf (https://github.com/junegunn/fzf) and open it:
+
+#+begin_src bash
+$ vim "$(git-changed -e | fzf)"
+#+end_src
+
+Run a linter before each push with lefthook. The list contains all the work on the branch, also the work that you did not commit:
+
+#+begin_src yaml
+pre-push:
+  commands:
+    rubocop:
+      run: git-changed -e -0 '**/*.rb' | xargs -0 bundle exec rubocop
+#+end_src
+
+Compare with the ~development~ branch and compile each changed file:
 
 #+begin_src bash
 $ git-changed -0 -b development '**/*.rs' | xargs -0 -n 1 rustc

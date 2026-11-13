@@ -6,6 +6,7 @@ Feature: Non-empty git repository
     And the user executes the command: "git config user.name 'John Doe'"
     And the user executes the command: "git config user.email 'jdoe@example.com'"
     And the user executes the command: "git commit --allow-empty --message 'Initial commit'"
+    And the user executes the command: "git update-ref refs/remotes/origin/main main"
     And the user executes the command: "touch README.md"
     And the user executes the command: "git add README.md"
 
@@ -31,10 +32,11 @@ Feature: Non-empty git repository
         README.md
         """
 
-  Rule: With changes committed on the base branch
+  Rule: With changes pushed to the base branch
 
-    Background: With committed changes
+    Background: With pushed changes
       When the user executes the command: "git commit --message 'Adding README'"
+      And the user executes the command: "git update-ref refs/remotes/origin/main main"
 
     Scenario: It displays nothing if there are no changes
       When the user executes the tool like: "git-changed"

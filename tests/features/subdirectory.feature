@@ -6,6 +6,7 @@ Feature: Run the tool in a subdirectory
     And the user executes the command: "git config user.name 'John Doe'"
     And the user executes the command: "git config user.email 'jdoe@example.com'"
     And the user executes the command: "git commit --allow-empty --message 'Initial commit'"
+    And the user executes the command: "git update-ref refs/remotes/origin/main main"
     And the user executes the command: "mkdir src"
     And the user executes the command: "touch README.md src/main.rs"
     And the user executes the command: "git add README.md src/main.rs"

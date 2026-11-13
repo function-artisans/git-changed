@@ -6,6 +6,7 @@ Feature: Untracked files
     And the user executes the command: "git config user.name 'John Doe'"
     And the user executes the command: "git config user.email 'jdoe@example.com'"
     And the user executes the command: "git commit --allow-empty --message 'Initial commit'"
+    And the user executes the command: "git update-ref refs/remotes/origin/main main"
     And the user executes the command: "mkdir docs"
     And the user executes the command: "touch docs/guide.md"
 

@@ -11,8 +11,8 @@ use std::collections::BTreeSet;
 use std::path::Path;
 use std::path::PathBuf;
 
-const CONFIG_PATHS: [&str; 2] = ["changed.defaultBranch", "init.defaultBranch"];
-const DEFAULT_BRANCH: &str = "main";
+const CONFIG_PATH: &str = "changed.defaultBranch";
+const DEFAULT_BRANCH: &str = "origin/main";
 
 pub fn open_repository(directory: &Path) -> Result<Repository> {
     Repository::discover(directory)
@@ -56,18 +56,13 @@ fn canonical(path: &Path) -> Result<PathBuf> {
 fn default_branch(repo: &Repository) -> Result<String> {
     let config = repo.config().context("Cannot read the git config")?;
 
-    for path in CONFIG_PATHS {
-        match config.get_string(path) {
-            Ok(branch) => return Ok(branch),
-            Err(error) if error.code() == ErrorCode::NotFound => continue,
-            Err(error) => {
-                return Err(error)
-                    .with_context(|| format!("Cannot read {path} from the git config"))
-            }
+    match config.get_string(CONFIG_PATH) {
+        Ok(branch) => Ok(branch),
+        Err(error) if error.code() == ErrorCode::NotFound => Ok(DEFAULT_BRANCH.to_string()),
+        Err(error) => {
+            Err(error).with_context(|| format!("Cannot read {CONFIG_PATH} from the git config"))
         }
     }
-
-    Ok(DEFAULT_BRANCH.to_string())
 }
 
 fn committed_changes(repo: &Repository, base: &str) -> Result<Vec<String>> {
