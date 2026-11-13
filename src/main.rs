@@ -17,7 +17,7 @@ fn main() {
             return;
         }
 
-        eprintln!("{error}");
+        eprintln!("{error:#}");
         process::exit(1);
     }
 }
