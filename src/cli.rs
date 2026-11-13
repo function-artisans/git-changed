@@ -1,4 +1,3 @@
-use anyhow::Result;
 use clap::builder::Arg;
 use clap::builder::ArgAction;
 use clap::builder::Command;
@@ -96,8 +95,6 @@ fn matches_to_options(matches: ArgMatches) -> Options {
     }
 }
 
-pub fn get_options() -> Result<Options> {
-    let matches = command().try_get_matches()?;
-
-    Ok(matches_to_options(matches))
+pub fn get_options() -> Options {
+    matches_to_options(command().get_matches())
 }

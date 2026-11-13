@@ -30,16 +30,11 @@ fn execute(options: Options) -> Result<()> {
     Ok(())
 }
 
-fn main() -> Result<()> {
-    let options = cli::get_options()?;
+fn main() {
+    let options = cli::get_options();
 
-    match execute(options) {
-        Ok(()) => {
-            process::exit(0);
-        }
-        Err(error) => {
-            eprintln!("{}", error);
-            process::exit(1);
-        }
+    if let Err(error) = execute(options) {
+        eprintln!("{error}");
+        process::exit(1);
     }
 }
