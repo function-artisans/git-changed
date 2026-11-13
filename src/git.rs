@@ -12,6 +12,7 @@ fn status_options() -> StatusOptions {
     let mut options = StatusOptions::default();
 
     options.include_untracked(true);
+    options.recurse_untracked_dirs(true);
     options.exclude_submodules(true);
 
     options
