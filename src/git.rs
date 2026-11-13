@@ -5,7 +5,7 @@ use git2::Oid;
 use git2::Repository;
 use git2::StatusOptions;
 use git2::Tree;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use std::env;
 
 fn status_options() -> StatusOptions {
@@ -84,11 +84,11 @@ pub fn open_repository() -> Result<Repository> {
         .with_context(|| format!("Cannot find a repository at {}", cwd.display()))
 }
 
-pub fn changes(repo: &Repository, base: &String) -> Result<HashSet<String>> {
+pub fn changes(repo: &Repository, base: &String) -> Result<BTreeSet<String>> {
     let committed = committed_changes(repo, base)?.into_iter();
     let uncommitted = uncommitted_changes(repo)?.into_iter();
 
     let files = committed.chain(uncommitted);
 
-    Ok(HashSet::from_iter(files))
+    Ok(BTreeSet::from_iter(files))
 }
