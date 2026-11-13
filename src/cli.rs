@@ -2,17 +2,13 @@ use clap::builder::Arg;
 use clap::builder::ArgAction;
 use clap::builder::Command;
 use clap::ArgMatches;
-use git2::Config;
 use glob::Pattern;
 use std::fmt;
-
-const CONFIG_PATHS: [&str; 2] = ["changed.defaultBranch", "init.defaultBranch"];
-const DEFAULT_BRANCH: &str = "main";
 
 #[derive(Debug, Clone)]
 pub struct Options {
     pub pattern: Pattern,
-    pub base: String,
+    pub base: Option<String>,
     pub null: bool,
     pub exist: bool,
 }
@@ -21,23 +17,10 @@ impl fmt::Display for Options {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "pattern: {}, base: {}, null: {}, exist: {}",
+            "pattern: {}, base: {:?}, null: {}, exist: {}",
             self.pattern, self.base, self.null, self.exist
         )
     }
-}
-
-fn default_branch() -> String {
-    let config = Config::open_default().expect("Failed to open global config");
-
-    let branch = CONFIG_PATHS
-        .into_iter()
-        .find_map(|path| match config.get_entry(path) {
-            Ok(entry) => entry.value().map(str::to_string),
-            Err(_e) => None,
-        });
-
-    branch.unwrap_or(DEFAULT_BRANCH.to_owned())
 }
 
 fn command() -> Command {
@@ -72,10 +55,7 @@ fn matches_to_options(matches: ArgMatches) -> Options {
 
     let pattern = Pattern::new(glob).expect("Valid glob required");
 
-    let base = match matches.get_one::<String>("base") {
-        Some(value) => value.to_owned(),
-        None => default_branch(),
-    };
+    let base = matches.get_one::<String>("base").cloned();
 
     let null = match matches.get_one::<bool>("null") {
         Some(value) => value.to_owned(),

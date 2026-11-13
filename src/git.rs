@@ -8,6 +8,9 @@ use git2::Tree;
 use std::collections::BTreeSet;
 use std::env;
 
+const CONFIG_PATHS: [&str; 2] = ["changed.defaultBranch", "init.defaultBranch"];
+const DEFAULT_BRANCH: &str = "main";
+
 fn status_options() -> StatusOptions {
     let mut options = StatusOptions::default();
 
@@ -46,7 +49,7 @@ fn find_base_oid(repo: &Repository, base: &str) -> Result<Oid> {
     Ok(commit.id())
 }
 
-fn committed_changes(repo: &Repository, base: &String) -> Result<Vec<String>> {
+fn committed_changes(repo: &Repository, base: &str) -> Result<Vec<String>> {
     let base_oid = find_base_oid(repo, base)?;
 
     let head_oid = repo.head()?.target().context("Could not get oid")?;
@@ -77,6 +80,16 @@ fn map_new_files(delta: DiffDelta) -> Result<String> {
     Ok(path)
 }
 
+fn default_branch(repo: &Repository) -> Result<String> {
+    let config = repo.config().context("Cannot read the git config")?;
+
+    let branch = CONFIG_PATHS
+        .into_iter()
+        .find_map(|path| config.get_string(path).ok());
+
+    Ok(branch.unwrap_or_else(|| DEFAULT_BRANCH.to_string()))
+}
+
 pub fn open_repository() -> Result<Repository> {
     let cwd = env::current_dir()?;
 
@@ -84,8 +97,13 @@ pub fn open_repository() -> Result<Repository> {
         .with_context(|| format!("Cannot find a repository at {}", cwd.display()))
 }
 
-pub fn changes(repo: &Repository, base: &String) -> Result<BTreeSet<String>> {
-    let committed = committed_changes(repo, base)?.into_iter();
+pub fn changes(repo: &Repository, base: Option<&str>) -> Result<BTreeSet<String>> {
+    let base = match base {
+        Some(base) => base.to_string(),
+        None => default_branch(repo)?,
+    };
+
+    let committed = committed_changes(repo, &base)?.into_iter();
     let uncommitted = uncommitted_changes(repo)?.into_iter();
 
     let files = committed.chain(uncommitted);

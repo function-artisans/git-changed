@@ -30,6 +30,12 @@ Or you can set the configuration globally:
 $ git config --global changed.defaultBranch development
 #+end_src
 
+Or only for the current repository:
+
+#+begin_src bash
+$ git config changed.defaultBranch development
+#+end_src
+
 *** Filtering files with glob pattern
 
 #+begin_src bash

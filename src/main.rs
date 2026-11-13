@@ -26,7 +26,7 @@ fn execute(options: Options) -> Result<()> {
     let root = repo
         .workdir()
         .context("The repository has no working directory")?;
-    let changes = git::changes(&repo, &options.base)?;
+    let changes = git::changes(&repo, options.base.as_deref())?;
     let separator = if options.null { '\0' } else { '\n' };
 
     let mut stdout = io::stdout().lock();
