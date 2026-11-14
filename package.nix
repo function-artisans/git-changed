@@ -6,9 +6,12 @@
   git,
 }:
 
+let
+  cargoPackage = (lib.importTOML ./Cargo.toml).package;
+in
 rustPlatform.buildRustPackage {
-  pname = "git-changed";
-  version = "0.0.2";
+  pname = cargoPackage.name;
+  inherit (cargoPackage) version;
 
   src = lib.fileset.toSource {
     root = ./.;
@@ -31,8 +34,8 @@ rustPlatform.buildRustPackage {
   nativeCheckInputs = [ git ];
 
   meta = {
-    description = "Lists files modified since branching off";
-    homepage = "https://github.com/function-artisans/git-changed";
+    inherit (cargoPackage) description;
+    homepage = cargoPackage.repository;
     mainProgram = "git-changed";
   };
 }

@@ -10,6 +10,7 @@ use git2::Tree;
 use std::collections::BTreeSet;
 use std::path::Path;
 use std::path::PathBuf;
+use std::str;
 
 const CONFIG_PATH: &str = "changed.defaultBranch";
 const DEFAULT_BRANCH: &str = "origin/main";
@@ -80,7 +81,7 @@ fn committed_changes(repo: &Repository, base: &str) -> Result<Vec<String>> {
         .diff_tree_to_tree(Some(&old_tree), Some(&new_tree), None)
         .with_context(|| format!("Cannot compare {base} with HEAD"))?;
 
-    diff.deltas().map(changed_path).collect()
+    Ok(diff.deltas().filter_map(changed_path).collect())
 }
 
 fn find_commit<'repo>(repo: &'repo Repository, revision: &str) -> Result<Commit<'repo>> {
@@ -95,17 +96,21 @@ fn find_tree(repo: &Repository, oid: Oid) -> Result<Tree<'_>> {
         .with_context(|| format!("Cannot find the tree of {oid}"))
 }
 
-fn changed_path(delta: DiffDelta) -> Result<String> {
-    let path = delta
-        .new_file()
-        .path()
-        .context("A changed file has no path")?;
+fn changed_path(delta: DiffDelta) -> Option<String> {
+    delta.new_file().path_bytes().and_then(utf8_path)
+}
 
-    let text = path
-        .to_str()
-        .with_context(|| format!("The path {} is not UTF-8", path.display()))?;
+// A path that is not UTF-8 gets a warning, so the other paths still go to the output.
+fn utf8_path(bytes: &[u8]) -> Option<String> {
+    match str::from_utf8(bytes) {
+        Ok(path) => Some(path.to_string()),
+        Err(_) => {
+            let path = String::from_utf8_lossy(bytes);
+            eprintln!("Skip the path {path}, because it is not UTF-8");
 
-    Ok(text.to_string())
+            None
+        }
+    }
 }
 
 fn uncommitted_changes(repo: &Repository) -> Result<Vec<String>> {
@@ -113,16 +118,12 @@ fn uncommitted_changes(repo: &Repository) -> Result<Vec<String>> {
         .statuses(Some(&mut status_options()))
         .context("Cannot read the status of the working directory")?;
 
-    statuses
+    let paths = statuses
         .iter()
-        .map(|entry| {
-            let path = entry
-                .path()
-                .context("A changed file has a path that is not UTF-8")?;
+        .filter_map(|entry| utf8_path(entry.path_bytes()))
+        .collect();
 
-            Ok(path.to_string())
-        })
-        .collect()
+    Ok(paths)
 }
 
 fn status_options() -> StatusOptions {

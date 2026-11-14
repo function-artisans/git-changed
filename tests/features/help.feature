@@ -5,7 +5,7 @@ Feature: Help
     When the user executes the tool like: "git-changed -h"
     Then it succeeds with the following output
       """
-      Lists files modified since branching off
+      List the files that changed in the current git branch
 
       Usage: git-changed [OPTIONS] [glob]
 

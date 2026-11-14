@@ -174,9 +174,3 @@ Compare with the `development` branch and compile each changed file:
 ```bash
 $ git-changed -0 -b development '**/*.rs' | xargs -0 -n 1 rustc
 ```
-
-## Dependencies
-
-- [clap](https://docs.rs/clap/latest/clap/)
-- [git2](https://docs.rs/git2/latest/git2/)
-- [glob](https://docs.rs/glob/latest/glob/)
