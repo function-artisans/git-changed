@@ -1,5 +1,5 @@
 {
-  description = "Lists files modified since branching off";
+  description = "List the files that changed in the current git branch";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -29,7 +29,7 @@
         git-changed = {
           type = "app";
           program = nixpkgs.lib.getExe self.packages.${system}.git-changed;
-          meta.description = "List the files that changed since the branch point";
+          meta.description = self.packages.${system}.git-changed.meta.description;
         };
         default = git-changed;
       });

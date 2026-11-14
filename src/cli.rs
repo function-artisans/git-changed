@@ -18,7 +18,7 @@ pub fn get_options() -> Options {
 
 fn command() -> Command {
     Command::new("git-changed")
-        .about("Lists files modified since branching off")
+        .about(env!("CARGO_PKG_DESCRIPTION"))
         .args([
             Arg::new("null")
                 .short('0')
